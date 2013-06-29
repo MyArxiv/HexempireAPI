@@ -3,6 +3,7 @@ package net.donizyo.hexempire;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
+import java.lang.reflect.Field;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.Set;
@@ -11,13 +12,12 @@ import javax.xml.bind.JAXBContext;
 import javax.xml.bind.JAXBException;
 import javax.xml.bind.Marshaller;
 import javax.xml.bind.Unmarshaller;
-import javax.xml.bind.annotation.XmlAttribute;
 import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import javax.xml.bind.annotation.XmlType;
-
+//<?xml-stylesheet type="text/xsl" href="protocol.xsl"?>
 @XmlRootElement
-public class ProtocolManager {
+public class Protocols {
 	private static Marshaller marshaller;
 	private static Unmarshaller unmarshaller;
 
@@ -27,7 +27,7 @@ public class ProtocolManager {
 
 	private static void initManager() {
 		try {
-			JAXBContext context = JAXBContext.newInstance(ProtocolManager.class);
+			JAXBContext context = JAXBContext.newInstance(Protocols.class);
 			marshaller = context.createMarshaller();
 			unmarshaller = context.createUnmarshaller();
 		} catch (JAXBException e) {
@@ -38,25 +38,28 @@ public class ProtocolManager {
 	@XmlElement
 	private final Set<Instruction> instructions = new HashSet<>();
 
+	@XmlElement
+	private int size = 0;
+
 	@XmlType
 	public static class Instruction {
 		public static class InstructionEntry {
-			@XmlAttribute
 			private final int id;
-			@XmlElement
-			private final String name;
+			private String name;
 			public InstructionEntry(String entryName, int id) {
 				this.id = id;
 				this.name = entryName;
 			}
+			@XmlElement
 			public int getId() {
 				return id;
 			}
+			@XmlElement
 			public String getName() {
 				return name;
 			}
 		}
-		@XmlAttribute
+		@XmlElement
 		private final int id;
 		@XmlElement
 		private final String name;
@@ -96,6 +99,10 @@ public class ProtocolManager {
 			return -1;
 		}
 
+		public void set(int index, String entryName) {
+			entries[index].name = entryName;
+		}
+
 		public String toString() {
 			return "Instruction " + name + "[" + entries[0] + ", " + entries[1] + ", " + entries[2] + ", " + entries[3] + "].";
 		}
@@ -110,17 +117,16 @@ public class ProtocolManager {
 		return null;
 	}
 
-	public boolean add(Instruction instruction) {
-		return instructions.add(instruction);
-	}
-
 	public boolean add(String instructionName, String... entries) {
 		synchronized (instructions) {
-			return add(new Instruction(instructionName, instructions.size(), entries));
+			return instructions.add(new Instruction(instructionName, instructions.size(), entries));
 		}
 	}
 
 	public void exportToXml(FileOutputStream os) throws JAXBException {
+		if (instructions.isEmpty())
+			return;
+		size = instructions.size();
 		System.out.println("Exporting to xml...");
 		marshaller.marshal(this, os);
 	}
@@ -129,16 +135,16 @@ public class ProtocolManager {
 		exportToXml(new FileOutputStream(path));
 	}
 
-	public static ProtocolManager importFromXml(FileInputStream is) throws JAXBException {
+	public static Protocols importFromXml(FileInputStream is) throws JAXBException {
 		System.out.println("Importing from xml...");
-		ProtocolManager manager = (ProtocolManager) unmarshaller.unmarshal(is);
+		Protocols manager = (Protocols) unmarshaller.unmarshal(is);
 		for (Iterator<Instruction> itr = manager.instructions.iterator(); itr.hasNext();) {
 			System.out.println(itr.next());
 		}
 		return manager;
 	}
 
-	public static ProtocolManager importFromXml(String path) throws FileNotFoundException, JAXBException {
+	public static Protocols importFromXml(String path) throws FileNotFoundException, JAXBException {
 		return importFromXml(new FileInputStream(path));
 	}
 
@@ -147,9 +153,11 @@ public class ProtocolManager {
 	}
 
 	public static void main(String[] args) {
-		ProtocolManager manager = new ProtocolManager();
-		manager.add("GridInfo", "gid", "nid", "n", "m");
-		manager.add("QueryGrid", "gid", null, null, null);
+		Protocols manager = new Protocols();
+		Class<?> cls1 = Communication.class;
+		for (Field f : cls1.getFields()) {
+			manager.add(f.getName(), "entry1", "entry2", "entry3", "entry4");
+		}
 		try {
 			manager.exportToXml("protocol.xml");
 		} catch (FileNotFoundException | JAXBException e) {

@@ -1,0 +1,53 @@
+<html>
+<head>
+<title>Protocols v1.0 from Hexempire API Project</title>
+<script>
+function deleteInstruction(node)
+{
+node.parentNode.removeChild(node);
+}
+function entryOnclick(event)
+{
+}
+function instructionOnclick(event)
+{
+var btnId=event.button;
+if (btnId==2)
+alert("不支持右键菜单");
+}
+function warn(entry)
+{
+/*
+var tf=document.createElement("form");
+var tff=document.createElement("input");
+alert(entry.innerHTML);
+var txt=document.createTextNode(entry.innerHTML);
+entry.innerHTML="";
+entry.appendChild(tf);
+tf.appendChild(tff);*/
+var text=entry.innerHTML;
+var form=document.createElement("form");
+var input=document.createElement("input");
+alert(text);
+var txt=document.createTextNode(text);
+entry.innerHTML="";
+entry.appendChild(form);
+form.appendChild(input);
+input.appendChild(txt);
+}
+</script>
+</head>
+<body bgcolor="black" text="white">
+<h2>Protocols v1.0 from Hexempire API Project</h2>
+<table border="1">
+<tr>
+	<th>Head1</th>
+	<th>Head2</th>
+</tr>
+<tr>
+	<td onmouseover="warn(this)">data1</td>
+	<td onclick="warn(this)">data2</td>
+</tr>
+</table>
+</body>
+</html>

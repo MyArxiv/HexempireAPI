@@ -40,4 +40,8 @@ public class Utils {
     	}
     	return negative ? -result : result;
     }
+
+    public static class CPointer {
+    	
+    }
 }
