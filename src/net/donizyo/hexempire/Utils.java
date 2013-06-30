@@ -9,8 +9,8 @@ public class Utils {
 	public static final long TIMEOUT = 10000l;
 	public static final Charset CHARSET = Charset.forName("GBK");
 	
-    public static int parseHexInt(String s) {
-    	int result = 0;
+    public static long parseHexInt(String s) {
+    	long result = 0;
     	boolean negative = false;
     	int i = 0, len = s.length();
     	int shift = 10;
